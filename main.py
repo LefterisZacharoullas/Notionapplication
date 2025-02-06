@@ -3,44 +3,11 @@ import json
 from datetime import datetime , timezone
 from dotenv import load_dotenv
 import os
+from NotionApi import NotionAPI
 
 if not os.path.exists('.env'):
     raise FileNotFoundError("The .env file is missing.")
 load_dotenv() # Load environment variables from .env file
-
-class NotionAPI:
-    def __init__(self , databaseID: str , headers: dict):
-        self.Reading_database_id = databaseID
-        self.head = headers
-
-    # Response a Database
-    def responseDatabase(self, databasename: str) -> list:
-        readUrl=f"https://api.notion.com/v1/databases/{self.Reading_database_id}/query"
-        res=requests.request("POST", readUrl, headers= self.head)
-        print(res.status_code)
-
-        data = res.json()
-        with open(f"{databasename}.json" , "w", encoding='utf8') as f:
-            json.dump(data , f , ensure_ascii=False , indent=4)
-        return data["results"]
-
-    # Create a Page
-    def createPage(self, data: dict):
-        createUrl = 'https://api.notion.com/v1/pages'
-
-        newPageData = { "parent": { "database_id": self.Reading_database_id }, "properties": data }
-    
-        res = requests.post(createUrl, headers= self.head, json=newPageData)
-        print(res.status_code)
-
-    # Update_page
-    def update_page(self, page_id , data: dict):
-        url = f"https://api.notion.com/v1/pages/{page_id}"
-    
-        payload = {"properties" : data}
-
-        res = requests.patch(url , json=payload , headers=self.head)
-        print(res.status_code)
 
 def manage_book() -> str:
     filename = "current_book.txt"
@@ -72,7 +39,6 @@ def manage_book() -> str:
 def reading_book(headers):
     Reading_database_id = os.getenv("READING_DATABASE_ID")
     bookreading = NotionAPI(Reading_database_id, headers)
-    bookreading.responseDatabase("Reading_database")
 
     book_name = manage_book()
     while True:
@@ -97,7 +63,6 @@ def reading_book(headers):
 def exercising(headers):
     gym_database_id = os.getenv("GYM_DATABASE_ID")
     gymexercise = NotionAPI(gym_database_id, headers)
-    gymexercise.responseDatabase("Gym_database")
 
     exercises = ["push-ups" , "pull-ups" , "incline press", "lat pulldown" 
                 , "butterfly" , "low row" , "triceps" , "biceps", "legs1" 
