@@ -1,12 +1,8 @@
-import requests
-import json
 from datetime import datetime , timezone
 from dotenv import load_dotenv
 import os
 from NotionApi import NotionAPI
 
-if not os.path.exists('.env'):
-    raise FileNotFoundError("The .env file is missing.")
 load_dotenv() # Load environment variables from .env file
 
 def manage_book() -> str:
@@ -39,7 +35,7 @@ def manage_book() -> str:
 def reading_book(headers):
     Reading_database_id = os.getenv("READING_DATABASE_ID")
     bookreading = NotionAPI(Reading_database_id, headers)
-
+    bookreading.responseDatabase()
     book_name = manage_book()
     while True:
         try:
@@ -63,7 +59,7 @@ def reading_book(headers):
 def exercising(headers):
     gym_database_id = os.getenv("GYM_DATABASE_ID")
     gymexercise = NotionAPI(gym_database_id, headers)
-
+    gymexercise.responseDatabase()
     exercises = ["push-ups" , "pull-ups" , "incline press", "lat pulldown" 
                 , "butterfly" , "low row" , "triceps" , "biceps", "legs1" 
                 , "legs2" , "legs3"]
@@ -105,6 +101,14 @@ def main():
     "Content-Type": "application/json",
     "Notion-Version": "2022-02-22"
     }
+
+    if not os.path.exists('.env'):
+        raise FileNotFoundError("The .env file is missing.")
+
+    REQUIRED_ENV_VARS = ["NOTION_TOKEN", "READING_DATABASE_ID", "GYM_DATABASE_ID"]
+    missing = [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]
+    if missing:
+        raise EnvironmentError(f"Отсутствуют необходимые переменные окружения: {', '.join(missing)}")
 
     while True:
         goal = input("What goal you achive today Reading-1, Exercising-2, STOP-0: ")
