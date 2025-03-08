@@ -1,4 +1,7 @@
 .env
 myenv/
 __pycache__/
-backend/__pycache__
+*.pyc
+*.pyo
+.pytest_cache/
+htmlcov/
