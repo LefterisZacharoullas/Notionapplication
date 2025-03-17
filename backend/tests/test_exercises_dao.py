@@ -1,5 +1,5 @@
 from controllers.exercises_controller import exercise_db
-from models.user import Exercise
+from models.data import Exercise
 import sqlite3
 import pytest
 from typing import Generator, Any

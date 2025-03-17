@@ -1,11 +1,17 @@
 from pydantic import BaseModel
-from typing import Union
 
-class Book(BaseModel):
-    book_name: str
-    author_name: str
-    page_number: int 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-class Exercise(BaseModel):
-    exercise_name: str
-    weight: Union[float , int] #Can be float or int
+class TokenData(BaseModel):
+    username: str | None = None
+
+class User(BaseModel):
+    username: str
+    email: str | None = None
+    full_name: str | None = None
+    disabled: bool | None = False
+
+class UserInDB(User):
+    hash_password: str

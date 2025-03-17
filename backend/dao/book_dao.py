@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from models.user import Book
+from models.data import Book
 
 
 class book_dao():

@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from models.user import Exercise
+from models.data import Exercise
 
 class exercise_db():
     def __init__(self, db_name: str = "database.db"):
@@ -18,11 +18,11 @@ class exercise_db():
 
 
     def show_all(self) -> list[tuple[Exercise]]:
-        """Display all records from a given table"""
+        """Display all records from the exercise table"""
 
         with self._conn as conn:
             c = conn.cursor()
-            c.execute(f"""SELECT * FROM exercises""")
+            c.execute("SELECT * FROM exercises")
             items = c.fetchall()
             return items 
 

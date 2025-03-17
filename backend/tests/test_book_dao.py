@@ -1,5 +1,5 @@
 from controllers.book_controller import book_dao
-from models.user import Book
+from models.data import Book
 import sqlite3
 import pytest
 from typing import Generator, Any

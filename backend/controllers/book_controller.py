@@ -1,6 +1,5 @@
-from models.user import Book
-from fastapi import APIRouter
-
+from models.data import Book
+from fastapi import APIRouter, HTTPException, Path
 from dao.book_dao import book_dao
 
 router = APIRouter() 
@@ -16,20 +15,21 @@ async def set_book_name(book: Book):
     else:
         db.update_books(book)
 
-    return {"book_name": book.book_name, "author_name": book.author_name, "page_number": book.page_number}
+    return {"book_data" : book}
 
 @router.get('/book/')
 async def get_book_name():
     db = book_dao()
     data = [{"book_name" : item[0] , "author_name" : item[1] , "page_number" : item[2]} for item in db.show_all()]
-    return data
+
+    return {"book_data" : data}
 
 @router.delete('/book/{book_name}')
-async def delete_book(book_name: str):
+async def delete_book(book_name: str = Path(description= "Input the name of the book you want to delete")):
     db = book_dao()
     data = db.show_all()
     for items in data:
-        if book_name in items[0]:
+        if book_name in items:
             db.delete_record_books(book_name)
             return {"Success" : True}
-    return {"Book_doesn't_exist" : False}
+    raise HTTPException(status_code= 404 , detail="book_name doesen't exits")

@@ -1,12 +1,11 @@
-from fastapi import APIRouter
-from models.user import Exercise
+from fastapi import APIRouter, HTTPException, Path
+from models.data import Exercise
 from dao.exercises_dao import exercise_db
-from typing import Any
 
 router = APIRouter()
 
-@router.put('/exercise/')
-async def set_exercise(exr: Exercise) -> dict[str, int]:
+@router.put('/exercise/') 
+async def set_exercise(exr: Exercise):
     db = exercise_db()
     data = db.show_all()
 
@@ -16,21 +15,24 @@ async def set_exercise(exr: Exercise) -> dict[str, int]:
     else:
         db.update_exercise(exr)
 
-    return {"exercise_name" : exr.exercise_name , "weight" : exr.weight}
+    return {"exercise_data" : exr}
 
 @router.get('/exercise/')
-async def get_exercise() -> list[dict]:
+async def get_exercise():
     db = exercise_db()
     #Converting the list of tuples to list of dictionaris
     data: list[dict] = [{"exercise_name" : item[0] , "weight" : item[1]} for item in db.show_all()]
-    return data
+
+    return {"exercise_data" : data}
 
 @router.delete('/exercise/{exercise_name}')
-async def delete_exercise(exercise_name: str) -> dict[str, bool]:
+async def delete_exercise(exercise_name: str = Path(description= "Input the name of exercise you want to delete")):
     db = exercise_db()
-    data: list[tuple[Any]] = db.show_all()
+    data = db.show_all()
+    
     for items in data:
-        if exercise_name in items[0]:
+        if exercise_name in items:
             db.delete_record_exercises(exercise_name)
             return {"Success" : True}
-    return {"exercise_doesn't_exist" : False}
+    else:  
+        raise HTTPException(status_code=404 , detail= "exercise_doesn't_exist" )
