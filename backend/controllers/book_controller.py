@@ -2,34 +2,47 @@ from models.data import Book
 from fastapi import APIRouter, HTTPException, Path
 from dao.book_dao import book_dao
 
+from fastapi import Depends
+from typing import Annotated
+from models.user import User
+from auth.auth_handler import get_current_active_user
+
 router = APIRouter() 
 
 @router.put('/book/')
-async def set_book_name(book: Book):
+async def set_book_name(book: Book, current_user: Annotated[User, Depends(get_current_active_user)],):
     db = book_dao()
-    data = db.show_all()
-    
-    existing_book = next((item for item in data if item[0] == book.book_name) , None)
+    data = db.show_all(current_user.username)
+
+    existing_book = False
+
+    for items_dict in data:
+        if book.book_name in items_dict.values():
+            existing_book = True
+        
     if not existing_book:
-        db.create_record_books(book)
+        db.create_record_books(current_user.username, book)
     else:
-        db.update_books(book)
+        db.update_books(book, current_user.username)
 
     return {"book_data" : book}
 
 @router.get('/book/')
-async def get_book_name():
+async def get_book_name(current_user: Annotated[User, Depends(get_current_active_user)]):
     db = book_dao()
-    data = [{"book_name" : item[0] , "author_name" : item[1] , "page_number" : item[2]} for item in db.show_all()]
-
+    data = db.show_all(current_user.username)
     return {"book_data" : data}
 
 @router.delete('/book/{book_name}')
-async def delete_book(book_name: str = Path(description= "Input the name of the book you want to delete")):
+async def delete_book(book_name: str, current_user: Annotated[User, Depends(get_current_active_user)] ):
     db = book_dao()
-    data = db.show_all()
-    for items in data:
-        if book_name in items:
-            db.delete_record_books(book_name)
+    data = db.show_all(current_user.username)
+    founded = False 
+    for items_dict in data:
+        if book_name in items_dict.values():                
+            founded = True
+            db.delete_record_books(book_name , current_user.username)
             return {"Success" : True}
-    raise HTTPException(status_code= 404 , detail="book_name doesen't exits")
+    
+    if not founded:
+        raise HTTPException(404, detail= "The books dont exits")
