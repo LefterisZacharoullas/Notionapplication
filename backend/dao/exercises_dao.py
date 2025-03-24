@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from models.data import Exercise
+from typing import Generator, Any
 
 class exercise_db():
     def __init__(self, db_name: str = "database.db"):
@@ -17,38 +18,45 @@ class exercise_db():
             self._conn = None  # Prevent accidental reuse
 
 
-    def show_all(self) -> list[tuple[Exercise]]:
+    def show_all(self, username: str):
         """Display all records from the exercise table"""
 
         with self._conn as conn:
+            conn.row_factory = lambda cursor, row: {col[0]: row[i] for i, col in enumerate(cursor.description)}
             c = conn.cursor()
-            c.execute("SELECT * FROM exercises")
-            items = c.fetchall()
-            return items 
+            c.execute("SELECT * FROM exercises WHERE username = ?", (username, ))
 
+            for items in c: 
+                yield items
 
-    def create_record_exercises(self, exr: Exercise) -> None:
+    def create_record_exercises(self, exr: Exercise, username: str) -> None:
         """Insert new exercise records."""
-        data = (exr.exercise_name, exr.weight)
-    
+        data = []
+        data.append(username)
+
+        for items in exr.model_dump().values():
+            data.append(items)
+
+      
         with self._conn as conn:
             c = conn.cursor()
-            c.execute("INSERT INTO exercises VALUES (?,?)" , data )
+            c.execute("INSERT INTO exercises VALUES (?,?,?)" ,tuple(data))
             self._conn.commit()
     
 
-    def delete_record_exercises(self , exercise_name: str) -> None:
+    def delete_record_exercises(self , exercise_name: str, username: str) -> None:
         """Delete an exercise record by name."""
         
         with self._conn as conn:
             c = conn.cursor()
-            c.execute("DELETE FROM exercises WHERE exercise = ? " , (exercise_name, ))
+            c.execute("DELETE FROM exercises WHERE exercise = ? and username = ? " , (exercise_name, username ))
             self._conn.commit()
 
 
-    def update_exercise(self , exr: Exercise) -> None:
+    def update_exercise(self , exr: Exercise, username: str) -> None:
         """Update existing exercise. """
+        
         with self._conn as conn:
             c = conn.cursor()
-            c.execute("UPDATE exercises SET weight = ? WHERE exercise = ?" , (exr.weight, exr.exercise_name))
+            c.execute("UPDATE exercises SET weight = ? WHERE exercise = ? and username =?" , (exr.weight, exr.exercise_name, username))
             self._conn.commit()
