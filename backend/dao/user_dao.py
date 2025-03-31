@@ -1,7 +1,6 @@
 import sqlite3
 from models.user import UserInDB
 import os
-from typing import Any
 
 class user_dao():
 

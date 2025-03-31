@@ -1,7 +1,6 @@
 import os
 import sqlite3
 from models.data import Book
-from typing import Any, Generator
 
 class book_dao():
     def __init__(self, db_name: str = "database.db"):

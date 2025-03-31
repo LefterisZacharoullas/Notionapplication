@@ -1,7 +1,7 @@
 from models.data import Book
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException
 from dao.book_dao import book_dao
-
+from notion_logic.books import add_notion_book_page 
 from fastapi import Depends
 from typing import Annotated
 from models.user import User
@@ -24,6 +24,8 @@ async def set_book_name(book: Book, current_user: Annotated[User, Depends(get_cu
         db.create_record_books(current_user.username, book)
     else:
         db.update_books(book, current_user.username)
+    
+    add_notion_book_page(book.book_name , book.author_name, book.page_number)
 
     return {"book_data" : book}
 

@@ -1,7 +1,6 @@
 import os
 import sqlite3
 from models.data import Exercise
-from typing import Generator, Any
 
 class exercise_db():
     def __init__(self, db_name: str = "database.db"):

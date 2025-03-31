@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, Path, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from models.data import Exercise
 from dao.exercises_dao import exercise_db
 from typing import Annotated
 from models.user import User
 from auth.auth_handler import get_current_active_user
+from notion_logic import exercises
 
 router = APIRouter()
 
@@ -22,6 +23,8 @@ async def set_exercise(exr: Exercise, current_user: Annotated[User, Depends(get_
         db.update_exercise(exr, current_user.username)
     else:
         db.create_record_exercises(exr, current_user.username)
+
+    exercises.add_notion_exercise_page(exr.exercise_name, exr.weight)
 
     return {"Success" : exr}    
     

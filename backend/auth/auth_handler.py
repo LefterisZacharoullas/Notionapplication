@@ -7,7 +7,7 @@ from fastapi import HTTPException, status, Depends
 from models.user import User, UserInDB, TokenData
 from datetime import datetime, timedelta, timezone
 from jwt.exceptions import InvalidTokenError
-from typing import Annotated, Any
+from typing import Annotated
 from dotenv import load_dotenv
 
 load_dotenv() # Load environment variables from .env file
